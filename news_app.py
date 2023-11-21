@@ -43,36 +43,39 @@ line1_spacer1, line1_1, line1_spacer2 = st.columns((0.1, 3.2, 0.1))
 with line1_1:
     st.header("Optional: Scrape Data")#**{}**".format(user_name))
     st.markdown("TODO: implement this in app")
-    
+            
     
 ######### 2. Select Datasets #########
 line2_spacer1, line2_1, line2_spacer2 = st.columns((0.1, 3.2, 0.1))
 selected_data = []
 data_frames = []
-data = []
+if 'data' not in st.session_state:
+    st.session_state.data = []
+if 'selected_data' not in st.session_state:
+    st.session_state.selected_data = []
 
 with line2_1:
     st.header("Select Datasets")
     
     # select box for datasets
-    datasets = [file for file in os.listdir("./data/") if file.endswith(('csv'))]
-    if len(datasets) == 0:
+    st.session_state.datasets = [file for file in os.listdir("./data/") if file.endswith(('csv'))]
+    if len(st.session_state.datasets) == 0:
         st.write("No datasets found in `data` folder.")
         st.stop()
-    selected_data = st.multiselect("Select", datasets)
+    st.session_state.selected_data = st.multiselect("Select", st.session_state.datasets)
 
     # load data button
     if st.button("Load data"):
-        for data_path in selected_data:
-            data_frames.append(pd.read_csv(os.path.join('./data/', data_path)))
-        data = pd.concat(data_frames)
-        data['date'] = pd.to_datetime(data['date'])
-        data = data.drop(['Unnamed: 0', 'year', 'month', 'url'], axis=1)
+        for data_path in st.session_state.selected_data:
+            data_frames.append(pd.read_csv(os.path.join('./data/', data_path)).head(500))
+        st.session_state.data = pd.concat(data_frames)
+        st.session_state.data['date'] = pd.to_datetime(st.session_state.data['date'])
+        st.session_state.data = st.session_state.data.drop(['Unnamed: 0', 'year', 'month', 'url'], axis=1)
     
-    if len(data) > 0:
+    if len(st.session_state.data) > 0:
         # display dataframe header
         st.write("First 20 entries in data:")
-        st.dataframe(data=data.head(20))
+        st.dataframe(data=st.session_state.data.head(20))
         
         # display data statistics
         #..
@@ -82,7 +85,7 @@ with line2_1:
 line3_spacer1, line3_1, line3_spacer2 = st.columns((0.1, 3.2, 0.1))
 
 with line3_1:
-    if len(data) == 0:
+    if len(st.session_state.data) == 0:
         st.write("No datasets loaded.")
         st.stop()
 
@@ -92,11 +95,11 @@ with line3_1:
     clustered_data = pd.DataFrame()
     if st.button("Cluster News Events"):
         # TODO: dynamically compute k
-        clustered_data = news_connector.KMeans(k=13, df=data)
+        st.session_state.data = news_connector.Cluster_Articles(k=13, df=st.session_state.data.copy())
         
     # display dataframe header
     st.write("First 20 entries in data with clusters:")
-    st.dataframe(data=clustered_data.head(20))
+    st.dataframe(data=st.session_state.data.head(20))
     
     
     
@@ -104,7 +107,7 @@ with line3_1:
 line4_spacer1, line4_1, line4_spacer2 = st.columns((0.1, 3.2, 0.1))
 
 with line4_1:
-    if len(data) == 0:
+    if len(st.session_state.data) == 0:
         st.write("No datasets loaded.")
         st.stop()
 

@@ -5,3 +5,5 @@ nltk
 scikit-learn
 streamlit
 streamlit_extras
+seaborn
+bs4
