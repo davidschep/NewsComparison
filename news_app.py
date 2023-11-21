@@ -15,6 +15,7 @@ import streamlit as st
 from streamlit_extras.add_vertical_space import add_vertical_space
 
 import news_connector
+import webscrapingnews
 
 ###
 # 1. Scrape Data
@@ -39,15 +40,21 @@ row0_2.subheader(
 
 ######### 1. Scrape Data #########
 line1_spacer1, line1_1, line1_spacer2 = st.columns((0.1, 3.2, 0.1))
+if 'select_agencies' not in st.session_state:
+    st.session_state.select_agencies = []
+if 'slider_articles_nr' not in st.session_state:
+    st.session_state.slider_articles_nr = 0    
 
 with line1_1:
     st.header("Optional: Scrape Data")#**{}**".format(user_name))
-    st.markdown("TODO: implement this in app")
-            
+    st.markdown("_All agencies and 500 articles might take up to 20 minutes.._")
+    select_agencies = st.multiselect("News Agencies", ['NY Post','Atlantic','CNN','Business Insider','Washington Post','Fox News','Guardian'])
+    slider_articles_nr = st.slider("Number of Articles", 0, 500)
+    if st.button("Scrape Web"):
+        webscrapingnews.scraper(filename="new_scraping_data.csv", publication_list=select_agencies, max_limit_num_articles=int(slider_articles_nr))   
     
 ######### 2. Select Datasets #########
 line2_spacer1, line2_1, line2_spacer2 = st.columns((0.1, 3.2, 0.1))
-selected_data = []
 data_frames = []
 if 'data' not in st.session_state:
     st.session_state.data = []
