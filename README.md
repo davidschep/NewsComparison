@@ -7,4 +7,6 @@ News Comparison project for Computational Tools for Data Science project.
 3. Download scraped data to `data` folder (`scraping_data.csv`).
 
 ### Run
-Run `--.py` to launch Streamlit program, or run individual notebooks for other tasks.
+Run `python -m streamlit run news_app.py --server.maxMessageSize 1000` to launch Streamlit program, or run individual notebooks for other tasks.
+
+The `server.maxMessageSize 1000` parameter gives the program 1GB memory, which is needed for the 600MB+ dataset.
