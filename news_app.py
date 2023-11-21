@@ -1,19 +1,20 @@
+###########################
+#
+# Main Streamlit application file
+#
+###########################
+
+
 import os
-import urllib.request
 
 import numpy as np
 import pandas as pd
 #import plotly.express as px
-import requests
 
 import streamlit as st
-#import xmltodict
-#from mitosheet.streamlit.v1 import spreadsheet
-#from pandas import json_normalize
 from streamlit_extras.add_vertical_space import add_vertical_space
-#from streamlit_lottie import st_lottie
 
-st.set_page_config(page_title="News Comparison App", layout="wide")
+import news_connector
 
 ###
 # 1. Scrape Data
@@ -21,6 +22,9 @@ st.set_page_config(page_title="News Comparison App", layout="wide")
 # 3. Process Similar Articles
 # 4. Article Statistics
 ###
+
+# Application setup
+st.set_page_config(page_title="News Comparison App", layout="wide")
 
 # Title setup
 row0_spacer1, row0_1, row0_spacer2, row0_2, row0_spacer3 = st.columns(
@@ -67,7 +71,8 @@ with line2_1:
     
     if len(data) > 0:
         # display dataframe header
-        st.dataframe(data=data)
+        st.write("First 20 entries in data:")
+        st.dataframe(data=data.head(20))
         
         # display data statistics
         #..
@@ -83,6 +88,17 @@ with line3_1:
 
     st.header("Process Similar Articles")
     
+    # cluster articles button
+    # TODO: add the cluster code, and then finish the button that clusters news articles in different 'events'
+    #clusters = []
+    #if st.button("Load data"):
+    #    clusters = news_connector.extract_documents(data)
+    # data['clusters'] = ...
+        
+    # display dataframe header
+    #st.write("First 20 entries in data with clusters:")
+    #st.dataframe(data=data.head(20))
+    
     
     
 ######### 4. Article Statistics #########
@@ -94,3 +110,5 @@ with line4_1:
         st.stop()
 
     st.header("Analyze Articles")
+    
+    # TODO: six different methods or so for comparing articles
