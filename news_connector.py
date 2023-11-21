@@ -20,6 +20,7 @@ from sklearn.preprocessing import normalize
 import re
 import os
 import warnings
+from sklearn.cluster import KMeans
 warnings.filterwarnings("ignore")
 
 
@@ -37,20 +38,20 @@ def filter_common_words(df, threshold=0.95):
     # Filter out words that exceed the threshold
     common_words = []
     for word, count in word_counts.items():
-      if count <= threshold:
-        common_words.append(word)
+        if count <= threshold:
+            common_words.append(word)
 
     # Apply the filter function to each row of the "content" column
     def filter_row(row):
-      words = row.split()
-      filtered_words = []
-      for word in words:
-          if word in common_words:
-              filtered_words.append(word)
-      return ' '.join(filtered_words)
+        words = row.split()
+        filtered_words = []
+        for word in words:
+            if word in common_words:
+                filtered_words.append(word)
+        return ' '.join(filtered_words)
 
+    # return filtered content
     df['content'] = df['content'].apply(filter_row)
-
     return df
 
 def remove_infrequent_words(df, min_frequency=5):
@@ -132,6 +133,7 @@ def tf_idf(tf_matrix, idf, documents):
 def extract_documents(df):
     """
     Main TF-IDF Function
+    Total time for 500 articles: 20 minutes
 
     Args:
         df (dataframe): dataframe with preprocessed content
@@ -140,14 +142,19 @@ def extract_documents(df):
         tf idf matrix
     """
     
+    # Update dataframe (500 articles: 4 min)
     df = filter_common_words(df)
+    
+    # Update dataframe (500 articles: 7 min)
+    df = remove_infrequent_words(df)
     
     # Download NLTK resources
     nltk.download('stopwords')
     
-    # Apply preprocessing to the 'content' column
+    # Apply preprocessing to the 'content' column (500 articles: 5 sec)
     df['preprocessed_content'] = df['content'].apply(preprocess_text)
     
+    # Following steps (500 articles: 7 min)
     # Extract documents
     docs = df['preprocessed_content'].str.split()
     # Vocabulary
@@ -160,7 +167,7 @@ def extract_documents(df):
     tfidf_matrix = tf_idf(tf_matrix, idf, docs)
     return tfidf_matrix
 
-def KMeans(k, df):
+def Cluster_Articles(k, df):
     kmeans = KMeans(k, random_state=123)
     tfidf_matrix = extract_documents(df)
     kmeans.fit(tfidf_matrix)
