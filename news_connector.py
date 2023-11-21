@@ -159,3 +159,10 @@ def extract_documents(df):
     # TF-IDF
     tfidf_matrix = tf_idf(tf_matrix, idf, docs)
     return tfidf_matrix
+
+def KMeans(k, df):
+    kmeans = KMeans(k, random_state=123)
+    tfidf_matrix = extract_documents(df)
+    kmeans.fit(tfidf_matrix)
+    df['cluster'] = kmeans.labels_
+    return df

@@ -89,15 +89,14 @@ with line3_1:
     st.header("Process Similar Articles")
     
     # cluster articles button
-    # TODO: add the cluster code, and then finish the button that clusters news articles in different 'events'
-    #clusters = []
-    #if st.button("Load data"):
-    #    clusters = news_connector.extract_documents(data)
-    # data['clusters'] = ...
+    clustered_data = pd.DataFrame()
+    if st.button("Cluster News Events"):
+        # TODO: dynamically compute k
+        clustered_data = news_connector.KMeans(k=13, df=data)
         
     # display dataframe header
-    #st.write("First 20 entries in data with clusters:")
-    #st.dataframe(data=data.head(20))
+    st.write("First 20 entries in data with clusters:")
+    st.dataframe(data=clustered_data.head(20))
     
     
     
