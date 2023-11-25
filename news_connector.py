@@ -180,7 +180,7 @@ class KMeansAlgorithm:
 
       return labels
 
-def KMeans(k, df):
+def Cluster_Articles(k, df):
     tfidf_matrix = extract_documents(df)
     Kmeans = KMeansAlgorithm(tfidf_matrix, k) # Optimal number of clusters is determined from the results of the elbow method
     labels = Kmeans.fit()
