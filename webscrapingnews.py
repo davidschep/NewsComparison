@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import os
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -398,8 +399,10 @@ class Top_News:
         self.results_df.drop_duplicates(subset=['url'], inplace=True)
         self.results_df.reset_index(drop=True, inplace=True)
 
-news_scraper = Top_News('all')
-news_scraper.scrape_publications()
-#news_scraper.article_distribution()
-news_scraper.scrape_articles()
-news_scraper.results_df.to_csv('scraping_data.csv', index=False)
+def scraper(filename='scraping_data.csv', publication_list='all', max_limit_num_articles=None):
+    news_scraper = Top_News(publication_list)
+    news_scraper.scrape_publications()
+    #news_scraper.article_distribution()
+    news_scraper.scrape_articles(max_articles_per_publication=max_limit_num_articles)
+    filename = os.path.join('./data/', filename)
+    news_scraper.results_df.to_csv(filename, index=False)

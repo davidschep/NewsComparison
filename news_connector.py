@@ -76,6 +76,7 @@ def tf_idf(tf_matrix, idf, documents):
 def extract_documents(df):
     """
     Main TF-IDF Function
+    Total time for 500 articles: 20 minutes
 
     Args:
         df (dataframe): dataframe with preprocessed content
@@ -86,9 +87,10 @@ def extract_documents(df):
     # Download NLTK resources
     nltk.download('stopwords')
     
-    # Apply preprocessing to the 'content' column
+    # Apply preprocessing to the 'content' column (500 articles: 5 sec)
     df['preprocessed_content'] = df['content'].apply(preprocess_text)
     
+    # Following steps (500 articles: 7 min)
     # Extract documents
     docs = df['preprocessed_content'].str.split()
     # Vocabulary
