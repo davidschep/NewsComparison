@@ -22,6 +22,8 @@ import matplotlib
 warnings.filterwarnings("ignore")
 from IPython.display import clear_output
 
+from datetime import datetime
+
 # Function to preprocess content column
 def preprocess_text(text):
     # Convert to lowercase
@@ -65,7 +67,7 @@ def inverse_document_frequency(documents, vocabulary):
         idf[word] = np.log((1+len(documents))/(counter+1))+1
     return idf
 
-def tf_idf(tf_matrix, idf, documents):
+def tf_idf(tf_matrix, idf, documents, vocab):
     tfidf_matrix = tf_matrix.copy()
     for i in range(len(documents)):
         tfidf_matrix.iloc[i] = tf_matrix.iloc[i] * idf
@@ -86,8 +88,9 @@ def extract_documents(df):
     """
     # Download NLTK resources
     nltk.download('stopwords')
-    
+
     # Apply preprocessing to the 'content' column (500 articles: 5 sec)
+    print("Clustering: preprocessing", datetime.now().strftime("%H:%M:%S"))
     df['preprocessed_content'] = df['content'].apply(preprocess_text)
     
     # Following steps (500 articles: 7 min)
@@ -95,12 +98,16 @@ def extract_documents(df):
     docs = df['preprocessed_content'].str.split()
     # Vocabulary
     vocab = vocabulary(docs)
+
     # TF
+    print("Clustering: term frequence", datetime.now().strftime("%H:%M:%S"))
     tf_matrix = term_frequency(docs, vocab)
     # IDF
     idf = inverse_document_frequency(docs, vocab)
+    
     # TF-IDF
-    tfidf_matrix = tf_idf(tf_matrix, idf, docs)
+    print("Clustering: tf_idf", datetime.now().strftime("%H:%M:%S"))
+    tfidf_matrix = tf_idf(tf_matrix, idf, docs, vocab)
     return tfidf_matrix
 
 class KMeansAlgorithm:
@@ -162,6 +169,7 @@ class KMeansAlgorithm:
         plt.show()
 
     def fit(self):
+      print("Clustering: KMeans fit()", datetime.now().strftime("%H:%M:%S"))
       
       # Run the Kmeans algorithm using helper functions
       self.centroids = self.init_random_centroids() # Init centroids
@@ -172,7 +180,7 @@ class KMeansAlgorithm:
         new_centroids = self.update_centroids(labels) # Calculated centroids based on mean of the points in that cluster
 
         if np.all(new_centroids == self.centroids): # If no new centroids break loop
-          print("Kmeans has converged!")
+          print("Clustering: Kmeans has converged!", datetime.now().strftime("%H:%M:%S"))
           break
 
         self.centroids = new_centroids
