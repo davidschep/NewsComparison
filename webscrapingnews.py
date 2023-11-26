@@ -12,8 +12,7 @@ import seaborn as sns
 
 ## Scrape Guardian
 def scrape_guardian_article(df_row):
-    response = requests.get(df_row['url'])
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = df_row['soup']
 
     # Attempt to get summary
     summary_tag = soup.find('div', {'data-gu-name': 'standfirst'})
@@ -55,8 +54,7 @@ def scrape_guardian_article(df_row):
 
 ## Scrape Washington Post
 def scrape_washington_post_article(df_row):
-    response = requests.get(df_row['url'])
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = df_row['soup']
 
     # Attempt to get summary
     summary = None
@@ -105,8 +103,7 @@ def scrape_washington_post_article(df_row):
 
 ## Scrape NY Post
 def scrape_ny_post_article(df_row):
-    response = requests.get(df_row['url'])
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = df_row['soup']
 
     # No summaries exist
     summary = None
@@ -139,9 +136,7 @@ def scrape_ny_post_article(df_row):
 
 ## Scrape Atlantic
 def scrape_atlantic_article(df_row):
-    # Send a request to the URL and parse the content
-    response = requests.get(df_row['url'])
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = df_row['soup']
 
     # Attempt to get summary
     summary_tag = soup.find(class_='ArticleHero_dek__EqdkK')
@@ -176,8 +171,7 @@ def scrape_atlantic_article(df_row):
 
 ## Scrape CNN
 def scrape_cnn_article(df_row):
-    response = requests.get(df_row['url'])
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = df_row['soup']
 
     # No summaries for CNN articles
     summary = None
@@ -229,9 +223,7 @@ def scrape_cnn_article(df_row):
 ## Scrape Business Insider
 
 def scrape_business_insider_article(df_row):
-    # Send a request to the URL and parse the content
-    response = requests.get(df_row['url'])
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = df_row['soup']
     
     summary = None
 
@@ -257,9 +249,7 @@ def scrape_business_insider_article(df_row):
 
 ## Scrape Fox News
 def scrape_fox_news_article(df_row):
-    # Send a request to the URL and parse the content
-    response = requests.get(df_row['url'])
-    soup = BeautifulSoup(response.text, 'html.parser')
+    soup = df_row['soup']
 
     # Attempt to get summary
     summary_tag = soup.find('h2', class_='sub-headline speakable')
@@ -322,7 +312,6 @@ class Top_News:
             'Business Insider': ['https://www.businessinsider.com/', 'tout', 'quick-link', 'most-popular-item', '.featured-tout-collection-wrapper .tout-title a', '.two-column-wrapper .tout-title-link'],
             'Washington Post': ['https://www.washingtonpost.com/', 'wpds-c-iiQaMf wpds-c-iiQaMf-igUpeQR-css', 'wpds-c-iiQaMf wpds-c-iiQaMf-ikZTsyd-css', 'wpds-c-iiQaMf wpds-c-iiQaMf-ibYgSwf-css'],
             'Fox News': ['https://www.foxnews.com/', 'article'],
-            'NY Times': ['https://www.nytimes.com/', 'css-9mylee'],
             'Guardian': ['https://www.theguardian.com/', 'dcr-12ilguo', 'dcr-yw3hn9']
         }
 
