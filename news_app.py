@@ -24,6 +24,8 @@ import news_webscraping
 # 4. Article Statistics
 ###
 
+
+
 # Application setup
 st.set_page_config(page_title="News Comparison App", layout="wide")
 
@@ -38,6 +40,9 @@ row0_2.subheader(
     "Computational Tools for Data Science"
 )
 
+
+
+###########################################################################################
 ######### 1. Scrape Data #########
 line1_spacer1, line1_1, line1_spacer2 = st.columns((0.1, 3.2, 0.1))
 if 'select_agencies' not in st.session_state:
@@ -53,6 +58,9 @@ with line1_1:
     if st.button("Scrape Web"):
         news_webscraping.scraper(filename="new_scraping_data.csv", publication_list=select_agencies, max_limit_num_articles=int(slider_articles_nr))   
     
+    
+    
+###########################################################################################
 ######### 2. Select Datasets #########
 line2_spacer1, line2_1, line2_spacer2 = st.columns((0.1, 3.2, 0.1))
 data_frames = []
@@ -89,6 +97,8 @@ with line2_1:
         #..
     
     
+    
+###########################################################################################
 ######### 3. Process Similar Articles (News Connector) #########
 line3_spacer1, line3_1, line3_spacer2 = st.columns((0.1, 3.2, 0.1))
 
@@ -121,6 +131,7 @@ with line3_1:
     
     
     
+###########################################################################################
 ######### 4. Article Statistics #########
 line4_title_spacer1, line4_title, line4_title_spacer2 = st.columns((0.1, 3.2, 0.1))
 

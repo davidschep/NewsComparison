@@ -22,20 +22,20 @@ class KMeansAlgorithm:
         self.num_articles = X.shape[0]
 
     def init_random_centroids(self):
-      # Initializing KMeans by choosing random centroids 
-      idx = np.random.choice(self.num_articles, size=self.k, replace=False) # Extract random indices from dataframe
-      centroids = self.X[idx] # Pick random rows from the dataframe
-      return centroids
+        # Initializing KMeans by choosing random centroids 
+        idx = np.random.choice(self.num_articles, size=self.k, replace=False) # Extract random indices from dataframe
+        centroids = self.X[idx] # Pick random rows from the dataframe
+        return centroids
 
     def calculate_euclidean_distances(self):
-      # Calculate distances from vector/row to centroid
-      num_centroids = self.centroids.shape[0]
-      distances = np.zeros((num_centroids, self.num_articles))
+        # Calculate distances from vector/row to centroid
+        num_centroids = self.centroids.shape[0]
+        distances = np.zeros((num_centroids, self.num_articles))
 
-      for centroid_idx in range(num_centroids):
-          for article_idx in range(self.num_articles):
-              distances[centroid_idx, article_idx] = np.sqrt(np.sum((self.centroids[centroid_idx, :] - self.X[article_idx, :]) ** 2))
-      return distances
+        for centroid_idx in range(num_centroids):
+            for article_idx in range(self.num_articles):
+                distances[centroid_idx, article_idx] = np.sqrt(np.sum((self.centroids[centroid_idx, :] - self.X[article_idx, :]) ** 2))
+        return distances
 
     def update_centroids(self, labels):
         # Calculate the mean of each cluster as new centroid
@@ -71,21 +71,21 @@ class KMeansAlgorithm:
         plt.show()
 
     def fit(self):
-      print("Clustering: KMeans fit()")
-      
-      # Run the Kmeans algorithm using helper functions
-      self.centroids = self.init_random_centroids() # Init centroids
+        print("Clustering: KMeans fit()")
+        
+        # Run the Kmeans algorithm using helper functions
+        self.centroids = self.init_random_centroids() # Init centroids
 
-      for i in range(self.max_iterations):
-        distances = self.calculate_euclidean_distances() # calculate eucledian distances
-        labels = np.argmin(distances, axis=0) # Assign to the cluster with the centroid that has the minimum distance to that point
-        new_centroids = self.update_centroids(labels) # Calculated centroids based on mean of the points in that cluster
+        for i in range(self.max_iterations):
+            distances = self.calculate_euclidean_distances() # calculate eucledian distances
+            labels = np.argmin(distances, axis=0) # Assign to the cluster with the centroid that has the minimum distance to that point
+            new_centroids = self.update_centroids(labels) # Calculated centroids based on mean of the points in that cluster
 
-        if np.all(new_centroids == self.centroids): # If no new centroids break loop
-          print("Clustering: Kmeans has converged!")
-          break
+            if np.all(new_centroids == self.centroids): # If no new centroids break loop
+                print("Clustering: Kmeans has converged!")
+                break
 
-        self.centroids = new_centroids
-        #self.plot_clusters(labels, self.centroids, i) # Plot PCA 3D plot
+            self.centroids = new_centroids
+            #self.plot_clusters(labels, self.centroids, i) # Plot PCA 3D plot
 
-      return labels
+        return labels

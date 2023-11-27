@@ -66,6 +66,12 @@ class TFIDF:
         return tfidf
 
     def fit(self):
+        """
+        tf-idf fit function
+
+        Returns:
+            dataframe: size [n,n] where [i,j] corresponds to similarity article i and j
+        """
         # Apply preprocesing to news articles
         self.df['preprocessed_content'] = self.df['content'].apply(self.preprocess_articles)
         # Extract words from each news articles

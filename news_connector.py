@@ -21,7 +21,7 @@ def extract_documents(df):
         df (dataframe): dataframe with preprocessed content
         
     Returns:
-        tf idf matrix
+        tf idf matrix (dataframe): size [n,n] where [i,j] corresponds to similarity article i and j
     """
     tfidf = news_tfidf.TFIDF(df)
     tfidf_matrix = tfidf.fit()
