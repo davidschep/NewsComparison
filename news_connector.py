@@ -157,7 +157,7 @@ class KMeansAlgorithm:
         plt.show()
 
     def fit(self):
-      print("Clustering: KMeans fit()", datetime.now().strftime("%H:%M:%S"))
+      print("Clustering: KMeans fit()")
       
       # Run the Kmeans algorithm using helper functions
       self.centroids = self.init_random_centroids() # Init centroids
@@ -168,11 +168,11 @@ class KMeansAlgorithm:
         new_centroids = self.update_centroids(labels) # Calculated centroids based on mean of the points in that cluster
 
         if np.all(new_centroids == self.centroids): # If no new centroids break loop
-          print("Clustering: Kmeans has converged!", datetime.now().strftime("%H:%M:%S"))
+          print("Clustering: Kmeans has converged!")
           break
 
         self.centroids = new_centroids
-        self.plot_clusters(labels, self.centroids, i) # Plot PCA 3D plot
+        #self.plot_clusters(labels, self.centroids, i) # Plot PCA 3D plot
 
       return labels
 
@@ -192,12 +192,21 @@ def extract_documents(df):
 
     return tfidf_matrix
 
-def Cluster_Articles(k, tfidf_matrix):
-    tfidf_matrix = extract_documents(tfidf_matrix)
+def Cluster_Articles(k, data):
+    """Main cluster articles function
+
+    Args:
+        k (int): nr clusters
+        data (dataframe): PD dataframe with contents, etc.
+
+    Returns:
+        dataframe: df with ['clusters'] appended
+    """
+    tfidf_matrix = extract_documents(data)
     Kmeans = KMeansAlgorithm(tfidf_matrix, k) # Optimal number of clusters is determined from the results of the elbow method
     labels = Kmeans.fit()
-    tfidf_matrix['cluster'] = labels
-    return tfidf_matrix
+    data['cluster'] = labels
+    return data
 
 def elbow_method(data):
     # We will use elbow method to determine optimal number of clusters
