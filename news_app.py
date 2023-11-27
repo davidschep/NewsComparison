@@ -15,7 +15,7 @@ import streamlit as st
 from streamlit_extras.add_vertical_space import add_vertical_space
 
 import news_connector
-import webscrapingnews
+import news_webscraping
 
 ###
 # 1. Scrape Data
@@ -51,7 +51,7 @@ with line1_1:
     select_agencies = st.multiselect("News Agencies", ['NY Post','Atlantic','CNN','Business Insider','Washington Post','Fox News','Guardian'])
     slider_articles_nr = st.number_input("Number of Articles", 0, 500, value=10)
     if st.button("Scrape Web"):
-        webscrapingnews.scraper(filename="new_scraping_data.csv", publication_list=select_agencies, max_limit_num_articles=int(slider_articles_nr))   
+        news_webscraping.scraper(filename="new_scraping_data.csv", publication_list=select_agencies, max_limit_num_articles=int(slider_articles_nr))   
     
 ######### 2. Select Datasets #########
 line2_spacer1, line2_1, line2_spacer2 = st.columns((0.1, 3.2, 0.1))
