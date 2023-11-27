@@ -72,30 +72,6 @@ class TFIDF:
             idf[word] = np.log((len(docs))/(counter+1)) #TFIDF as stated in the slides of week 1
         return idf
 
-    # TF-IDF
-    def tf_idf(self, tf, idf, docs, vocab):
-        tfidf = pd.DataFrame(index=range(len(docs)), columns=vocab)  # Create an empty DataFrame
-        for i in range(len(docs)):
-            tfidf.iloc[i] = tf.iloc[i]*idf  # Multiply TF values by IDF for each term
-        tfidf = normalize(tfidf, norm='l2', axis=1)  # L2 normalization to scale vectors
-        tfidf = pd.DataFrame(tfidf, columns=vocab)
-        return tfidf
-    
-    def fit(self):
-        # Apply preprocesing to news articles
-        self.df['preprocessed_content'] = self.df['content'].apply(self.preprocess_articles)
-        # Extract words from each news articles
-        docs = df['preprocessed_content'].str.split()
-        # Create a vocabulary corresponding to all the words in every news article
-        vocab = self.vocabulary(docs)
-        # Calculate the TF
-        tf = self.term_frequency(docs, vocab)
-        # Calculate the IDF
-        idf = self.inverse_document_frequency(docs, vocab)
-        # Multiply TF with IDF and calculate TF-IDF
-        tfidf = self.tf_idf(tf, idf, docs, vocab)
-        return tfidf
-    
 class KMeansAlgorithm:
 
     def __init__(self, X, k, max_iterations=100):
@@ -155,6 +131,7 @@ class KMeansAlgorithm:
         plt.show()
 
     def fit(self):
+      print("Clustering: KMeans fit()", datetime.now().strftime("%H:%M:%S"))
       
       # Run the Kmeans algorithm using helper functions
       self.centroids = self.init_random_centroids() # Init centroids
@@ -165,7 +142,7 @@ class KMeansAlgorithm:
         new_centroids = self.update_centroids(labels) # Calculated centroids based on mean of the points in that cluster
 
         if np.all(new_centroids == self.centroids): # If no new centroids break loop
-          print("Kmeans has converged!")
+          print("Clustering: Kmeans has converged!", datetime.now().strftime("%H:%M:%S"))
           break
 
         self.centroids = new_centroids
