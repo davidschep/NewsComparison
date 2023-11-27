@@ -4,105 +4,98 @@
 #
 ###########################
 
+import math
 import pandas as pd
 import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.colors import ListedColormap
+from IPython.display import clear_output
 from collections import Counter
 import nltk
+import re
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
 from sklearn.preprocessing import normalize
-import matplotlib.pyplot as plt
-import re
-import warnings
-from matplotlib import cm
 from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
 from sklearn.decomposition import PCA
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib
+from sklearn.decomposition import TruncatedSVD
+import warnings
 warnings.filterwarnings("ignore")
-from IPython.display import clear_output
 
-# Function to preprocess content column
-def preprocess_text(text):
-    # Convert to lowercase
-    text = text.lower()
-
-    # Remove special characters and digits
-    text = re.sub(r'[^a-z\s]', '', text)
-
-    # Tokenize and remove stopwords
-    stop_words = set(stopwords.words('english'))
-    tokens = [word for word in text.split() if word not in stop_words]
-
-    # Apply stemming
-    stemmer = PorterStemmer()
-    stemmed_tokens = [stemmer.stem(word) for word in tokens]
-
-    return ' '.join(stemmed_tokens)
-
-def vocabulary(docs):
-    """Create vocabulary"""
-    vocab = set()
-    for doc in docs:
-        for word in doc:
-            vocab.add(word)
-    return sorted(vocab)
-
-def term_frequency(documents, vocabulary):
-    tf_matrix = pd.DataFrame(0, index=np.arange(len(documents)), columns=vocabulary)
-    for i, document in enumerate(documents):
-        for word in document:
-            tf_matrix.at[i, word] += 1
-    return tf_matrix
-
-def inverse_document_frequency(documents, vocabulary):
-    idf = pd.Series(0, index=vocabulary)
-    for word in vocabulary:
-        counter = 0
-        for document in documents:
-            if word in document:
-                counter += 1
-        idf[word] = np.log((1+len(documents))/(counter+1))+1
-    return idf
-
-def tf_idf(tf_matrix, idf, documents):
-    tfidf_matrix = tf_matrix.copy()
-    for i in range(len(documents)):
-        tfidf_matrix.iloc[i] = tf_matrix.iloc[i] * idf
-    tfidf_matrix = normalize(tfidf_matrix, norm='l2', axis=1)
-    tfidf_matrix = pd.DataFrame(tfidf_matrix, columns=vocab)
-    return tfidf_matrix
-
-def extract_documents(df):
-    """
-    Main TF-IDF Function
-    Total time for 500 articles: 20 minutes
-
-    Args:
-        df (dataframe): dataframe with preprocessed content
-        
-    Returns:
-        tf idf matrix
-    """
-    # Download NLTK resources
-    nltk.download('stopwords')
+class TFIDF:
     
-    # Apply preprocessing to the 'content' column (500 articles: 5 sec)
-    df['preprocessed_content'] = df['content'].apply(preprocess_text)
-    
-    # Following steps (500 articles: 7 min)
-    # Extract documents
-    docs = df['preprocessed_content'].str.split()
-    # Vocabulary
-    vocab = vocabulary(docs)
-    # TF
-    tf_matrix = term_frequency(docs, vocab)
-    # IDF
-    idf = inverse_document_frequency(docs, vocab)
+    def __init__(self, df):
+        self.df = df
+        try:
+            nltk.download('stopwords') # Download necessary NLTK resources to remove stop words
+        except nltk.exceptions.AlreadyDownloaded:
+            # Handle the case where the resource is already downloaded
+            pass
+    def preprocess_articles(self, text):
+        text = text.lower() # Convert data to lover case to remove multiple occurences of the same word
+        text = re.sub(r'[^a-z\s]', '', text) # Remove special characters, digits and white space using regex expression
+        stop_words = set(stopwords.words('english')) # Import stop words from nltk library
+        words = [word for word in text.split() if word not in stop_words] # Extract all words that are not stop words
+        stemmer = PorterStemmer() # Apply stemming using nltk PorterStemmer
+        stemmed_words = [stemmer.stem(word) for word in words]
+        return ' '.join(stemmed_words)
+
+    # Create vocabulary of words from news articles
+    def vocabulary(self, docs):
+        vocab = set()
+        for doc in docs:
+            for word in doc:
+                vocab.add(word)
+        return sorted(vocab)
+
+    # Calculate Term frequency
+    def term_frequency(self, docs, vocab):
+        tf = pd.DataFrame(0, index=range(len(docs)), columns=vocab)
+        for i, document in enumerate(docs):
+            num_words_doc = len(document)
+            for word in document:
+                tf.at[i, word] += document.count(word)/num_words_doc
+        return tf
+
+    # Inverse Document Frequency
+    def inverse_document_frequency(self, docs, vocab):
+        # We want to reduce the weight of terms that appear frequently in our collection of articles.
+        idf = pd.Series(0, index=vocab) # Create series and set all elements to 0
+        for word in vocab:
+            counter = 0
+            for doc in docs:
+                if word in doc:
+                    counter +=1
+            idf[word] = np.log((len(docs))/(counter+1)) #TFIDF as stated in the slides of week 1
+        return idf
+
     # TF-IDF
-    tfidf_matrix = tf_idf(tf_matrix, idf, docs)
-    return tfidf_matrix
-
+    def tf_idf(self, tf, idf, docs, vocab):
+        tfidf = pd.DataFrame(index=range(len(docs)), columns=vocab)  # Create an empty DataFrame
+        for i in range(len(docs)):
+            tfidf.iloc[i] = tf.iloc[i]*idf  # Multiply TF values by IDF for each term
+        tfidf = normalize(tfidf, norm='l2', axis=1)  # L2 normalization to scale vectors
+        tfidf = pd.DataFrame(tfidf, columns=vocab)
+        return tfidf
+    
+    def fit(self):
+        # Apply preprocesing to news articles
+        self.df['preprocessed_content'] = self.df['content'].apply(self.preprocess_articles)
+        # Extract words from each news articles
+        docs = df['preprocessed_content'].str.split()
+        # Create a vocabulary corresponding to all the words in every news article
+        vocab = self.vocabulary(docs)
+        # Calculate the TF
+        tf = self.term_frequency(docs, vocab)
+        # Calculate the IDF
+        idf = self.inverse_document_frequency(docs, vocab)
+        # Multiply TF with IDF and calculate TF-IDF
+        tfidf = self.tf_idf(tf, idf, docs, vocab)
+        return tfidf
+    
 class KMeansAlgorithm:
 
     def __init__(self, X, k, max_iterations=100):
@@ -179,6 +172,22 @@ class KMeansAlgorithm:
         self.plot_clusters(labels, self.centroids, i) # Plot PCA 3D plot
 
       return labels
+
+def extract_documents(df):
+    """
+    Main TF-IDF Function
+    Total time for 500 articles: 20 minutes
+
+    Args:
+        df (dataframe): dataframe with preprocessed content
+        
+    Returns:
+        tf idf matrix
+    """
+    tfidf = TFIDF(df)
+    tfidf_matrix = tfidf.fit()
+
+    return tfidf_matrix
 
 def Cluster_Articles(k, df):
     tfidf_matrix = extract_documents(df)
