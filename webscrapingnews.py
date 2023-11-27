@@ -33,24 +33,10 @@ def scrape_guardian_article(df_row):
     date_tag = soup.find('span', class_='dcr-u0h1qy')
     date_string = date_tag.get_text(strip=True) if date_tag else 'Unknown'
 
-    """
-    # Parse the date if it's not 'Unknown'
-    if date_string != 'Unknown':
-        try:
-            date_format = "%B %d, %Y %I:%M%p"
-            date = datetime.strptime(date_string, date_format)
-        except ValueError:
-            date = 'Unknown'
-    else:
-        date = 'Unknown'
-
-    """
-
     # Update the df_row with the scraped data
     df_row['summary'] = summary
     df_row['author'] = author
     df_row['content'] = content
-    #df_row['date'] = date
     df_row['date'] = date_string
 
     return df_row
@@ -90,17 +76,11 @@ def scrape_washington_post_article(df_row):
         date_tag = soup.find(class_=candidate)
         if date_tag:
             date_string = date_tag.get_text(strip=True)
-            #date_string = date_string.replace('.m.', 'm').replace('EST', '').strip()
             break
-
-    # Parse the date
-    #date_format = "%B %d, %Y at %I:%M %p"
-    #date = datetime.strptime(date_string, date_format) if date_string else None
 
     df_row['summary'] = summary
     df_row['author'] = author
     df_row['content'] = content
-    #df_row['date'] = date
     df_row['date'] = date_string
 
     return df_row
@@ -124,17 +104,10 @@ def scrape_ny_post_article(df_row):
     # Get date
     date_tag = soup.find('div', class_='date--updated__item')
     date_string = date_tag.find_all('span')[1].get_text(strip=True) if date_tag else 'Unknown'
-    #date_string = date_string.replace('.m.', 'M').replace('ET', '').strip()
-    #date_format = "%b. %d, %Y, %I:%M %p"
-    #try:
-        #date = datetime.strptime(date_string, date_format)
-    #except ValueError:
-        #date = 'Unknown'
-
+    
     df_row['summary'] = summary
     df_row['author'] = author
     df_row['content'] = content
-    #df_row['date'] = date
     df_row['date'] = date_string
 
     return df_row
@@ -159,13 +132,6 @@ def scrape_atlantic_article(df_row):
     # Attempt to get date
     date_tag = soup.find('time', class_='ArticleTimestamp_root__b3bL6')
     date = date_tag['datetime'] if date_tag else 'Unknown'
-
-    # Parse the date if it's not 'Unknown'
-    #if date != 'Unknown':
-        #try:
-            #date = datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ').isoformat()
-        #except ValueError:
-            #date = 'Unknown'
 
     # Update the df_row with the scraped data
     df_row['summary'] = summary
@@ -202,27 +168,12 @@ def scrape_cnn_article(df_row):
         content = ' '.join(tag.get_text(strip=True) for tag in content_tags)
 
         date_tag = soup.find(class_='timestamp')
-        #date_string = ' '.join(date_tag.get_text(strip=True).split(' ')[-7:][-3:]+date_tag.get_text(strip=True).split(' ')[-7:][0:2]) if date_tag else 'Unknown'
         date_string = date_tag.get_text(strip=True).split('\n')[-1] if date_tag else 'Unknown'
-
-    # Parse the date if it's not 'Unknown'
-    """
-    if date_string != 'Unknown':
-        try:
-            if '/live-news/' in df_row['url']:
-                date_format = "%B %d, %Y %H:%M"
-            else:
-                date_format = '%B %d, %Y %I:%M %p'
-            date = datetime.strptime(date_string, date_format).isoformat()
-        except ValueError:
-            date = 'Unknown'
-    """
 
     # Update the df_row with the scraped data
     df_row['summary'] = summary
     df_row['author'] = author
     df_row['content'] = content
-    #df_row['date'] = date
     df_row['date'] = date_string
 
     return df_row
@@ -277,24 +228,10 @@ def scrape_fox_news_article(df_row):
     #date_string = date_tag.get_text(strip=True)[:-4] if date_tag else 'Unknown'
     date_string = date_tag.get_text(strip=True) if date_tag else 'Unknown'
 
-    """
-    # Parse the date if it's not 'Unknown'
-    if date_string != 'Unknown':
-        try:
-            date_format = "%B %d, %Y %I:%M%p"
-            date = datetime.strptime(date_string, date_format)
-        except ValueError:
-            date = 'Unknown'
-    else:
-        date = 'Unknown'
-
-    """
-
     # Update the df_row with the scraped data
     df_row['summary'] = summary
     df_row['author'] = author
     df_row['content'] = content
-    #df_row['date'] = date
     df_row['date'] = date_string
 
     return df_row
@@ -327,7 +264,7 @@ class Top_News:
             'Guardian': ['https://www.theguardian.com/', 'dcr-12ilguo', 'dcr-yw3hn9']
         }
     
-    def _get_soup(self, url,rate_limit_seconds=1):
+    def _get_soup(self, url,rate_limit_seconds=0.5):
         try:
             # implement rate limiting for ethical reasons
             time.sleep(rate_limit_seconds)
@@ -361,10 +298,13 @@ class Top_News:
             for block in article_blocks:
                 url = block.find('a')['href'] if block.find('a') else (block['href'] if 'href' in block.attrs else None)
                 if url:
+                    url = base_url[:-1]+url if url.startswith('/') else url
+                    url = url.replace('https://www.foxnews.com//www.foxnews.com', 'https://www.foxnews.com')
+                    url = url.replace('https://www.foxnews.com//www.foxweather.com', 'https://www.foxweather.com')
                     article_data = {
                         'name': class_name,
                         'title': block.get_text(strip=True),
-                        'url': base_url[:-1]+url if url.startswith('/') else url,
+                        'url': url,
                         'soup': self._get_soup(url) # get content of article
                     }
                     articles_data.append(article_data)
