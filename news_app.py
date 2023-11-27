@@ -140,15 +140,17 @@ with line4_1:
     st.subheader("Who's Reporting?")
     st.markdown("Comparison of what news agencies are reporting on this event")
     
-    counts = st.session_state.data['publication'].value_counts()
-    counts_df = pd.DataFrame({'publication':counts.index, 'count':counts.values})
+    publication = 'publication' if 'publication' in st.session_state.data else 'name'
+    
+    reportings_df = st.session_state.data.loc[st.session_state.data['cluster'] == event_selected]
+    counts = reportings_df[publication].value_counts()
+    counts_df = pd.DataFrame({publication:counts.index, 'count':counts.values})
     #reportings_count_df = pd.DataFrame([[st.session_state.data['name'].unique()],[]])
-    #reportings_df = pd.DataFrame(st.session_state.data.mask(st.session_state.data['cluster'] == event_selected).dropna().value_counts()).reset_index()
     #reportings_df.columns = ["Agency", "Count"]
     #reportings_df = reportings_df.sort_values(by="Year")
     fig = px.bar(
         counts_df,
-        x="publication",
+        x=publication,
         y="count",
         title="Published articles on event",
         color_discrete_sequence=["#9EE6CF"],
