@@ -25,6 +25,8 @@ from sklearn.decomposition import TruncatedSVD
 import warnings
 warnings.filterwarnings("ignore")
 
+import datetime
+
 class TFIDF:
     
     def __init__(self, df):
@@ -71,6 +73,30 @@ class TFIDF:
                     counter +=1
             idf[word] = np.log((len(docs))/(counter+1)) #TFIDF as stated in the slides of week 1
         return idf
+    
+    # TF-IDF
+    def tf_idf(self, tf, idf, docs, vocab):
+        tfidf = pd.DataFrame(index=range(len(docs)), columns=vocab)  # Create an empty DataFrame
+        for i in range(len(docs)):
+            tfidf.iloc[i] = tf.iloc[i]*idf  # Multiply TF values by IDF for each term
+        tfidf = normalize(tfidf, norm='l2', axis=1)  # L2 normalization to scale vectors
+        tfidf = pd.DataFrame(tfidf, columns=vocab)
+        return tfidf
+
+    def fit(self):
+        # Apply preprocesing to news articles
+        self.df['preprocessed_content'] = self.df['content'].apply(self.preprocess_articles)
+        # Extract words from each news articles
+        docs = self.df['preprocessed_content'].str.split()
+        # Create a vocabulary corresponding to all the words in every news article
+        vocab = self.vocabulary(docs)
+        # Calculate the TF
+        tf = self.term_frequency(docs, vocab)
+        # Calculate the IDF
+        idf = self.inverse_document_frequency(docs, vocab)
+        # Multiply TF with IDF and calculate TF-IDF
+        tfidf = self.tf_idf(tf, idf, docs, vocab)
+        return tfidf
 
 class KMeansAlgorithm:
 
@@ -166,12 +192,12 @@ def extract_documents(df):
 
     return tfidf_matrix
 
-def Cluster_Articles(k, df):
-    tfidf_matrix = extract_documents(df)
+def Cluster_Articles(k, tfidf_matrix):
+    tfidf_matrix = extract_documents(tfidf_matrix)
     Kmeans = KMeansAlgorithm(tfidf_matrix, k) # Optimal number of clusters is determined from the results of the elbow method
     labels = Kmeans.fit()
-    df['cluster'] = labels
-    return df
+    tfidf_matrix['cluster'] = labels
+    return tfidf_matrix
 
 def elbow_method(data):
     # We will use elbow method to determine optimal number of clusters

@@ -107,7 +107,8 @@ with line3_1:
     clustered_data = pd.DataFrame()
     if st.button("Cluster News Events"):
         # TODO: dynamically compute k
-        st.session_state.data = news_connector.Cluster_Articles(k=int(nr_clusters), df=st.session_state.data.copy())
+        tf_idf = news_connector.extract_documents(st.session_state.data.copy())
+        st.session_state.data = news_connector.Cluster_Articles(k=int(nr_clusters), tfidf_matrix=tf_idf)
     
     # display clusters
     if 'cluster' in st.session_state.data:
