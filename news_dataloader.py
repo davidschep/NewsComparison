@@ -28,6 +28,9 @@ def load_data(path, data_limit):
         drop_indices = np.random.choice(data.index, len(data)-data_limit, replace=False)
         data = data.drop(drop_indices)
     
+    # drop any unnamed columns
+    data = data.loc[:, ~data.columns.str.contains('^Unnamed')]
+    
     # optional, filter data:
     # NOTE: we assume that data loaded is already filtered for now
     #data = filter_scraped_data(data)
