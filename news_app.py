@@ -15,7 +15,8 @@ import streamlit as st
 from streamlit_extras.add_vertical_space import add_vertical_space
 
 import news_connector
-import webscrapingnews
+import news_webscraping
+import news_dataloader
 
 ###
 # 1. Scrape Data
@@ -23,6 +24,8 @@ import webscrapingnews
 # 3. Process Similar Articles
 # 4. Article Statistics
 ###
+
+
 
 # Application setup
 st.set_page_config(page_title="News Comparison App", layout="wide")
@@ -38,6 +41,9 @@ row0_2.subheader(
     "Computational Tools for Data Science"
 )
 
+
+
+###########################################################################################
 ######### 1. Scrape Data #########
 line1_spacer1, line1_1, line1_spacer2 = st.columns((0.1, 3.2, 0.1))
 if 'select_agencies' not in st.session_state:
@@ -51,8 +57,11 @@ with line1_1:
     select_agencies = st.multiselect("News Agencies", ['NY Post','Atlantic','CNN','Business Insider','Washington Post','Fox News','Guardian'])
     slider_articles_nr = st.number_input("Number of Articles", 0, 500, value=10)
     if st.button("Scrape Web"):
-        webscrapingnews.scraper(filename="new_scraping_data.csv", publication_list=select_agencies, max_limit_num_articles=int(slider_articles_nr))   
+        news_webscraping.scraper(filename="new_scraping_data.csv", publication_list=select_agencies, max_limit_num_articles=int(slider_articles_nr))   
     
+    
+    
+###########################################################################################
 ######### 2. Select Datasets #########
 line2_spacer1, line2_1, line2_spacer2 = st.columns((0.1, 3.2, 0.1))
 data_frames = []
@@ -69,16 +78,12 @@ with line2_1:
     if len(st.session_state.datasets) == 0:
         st.warning("No datasets found in `data` folder.")
         st.stop()
-    st.session_state.selected_data = st.multiselect("Select", st.session_state.datasets)
+    st.session_state.selected_data = st.selectbox("Select", st.session_state.datasets)
 
     # load data button
     if st.button("Load data"):
-        for data_path in st.session_state.selected_data:
-            DATA_LIMIT = 520 # how many items to load
-            data_frames.append(pd.read_csv(os.path.join('./data/', data_path)).head(DATA_LIMIT))
-        st.session_state.data = pd.concat(data_frames)
-        st.session_state.data['date'] = pd.to_datetime(st.session_state.data['date'])
-        st.session_state.data = st.session_state.data.drop(['Unnamed: 0', 'year', 'month', 'url'], axis=1, errors='ignore')
+        DATA_LIMIT = 520 # how many items to load
+        st.session_state.data = news_dataloader.load_data(str(st.session_state.selected_data), DATA_LIMIT)
     
     if len(st.session_state.data) > 0:
         # display dataframe header
@@ -89,6 +94,8 @@ with line2_1:
         #..
     
     
+    
+###########################################################################################
 ######### 3. Process Similar Articles (News Connector) #########
 line3_spacer1, line3_1, line3_spacer2 = st.columns((0.1, 3.2, 0.1))
 
@@ -121,6 +128,7 @@ with line3_1:
     
     
     
+###########################################################################################
 ######### 4. Article Statistics #########
 line4_title_spacer1, line4_title, line4_title_spacer2 = st.columns((0.1, 3.2, 0.1))
 
