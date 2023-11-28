@@ -18,6 +18,7 @@ import news_connector
 import news_webscraping
 import news_dataloader
 import news_summarization
+import news_sentimentanalysis
 
 ###
 # 1. Scrape Data
@@ -120,9 +121,12 @@ with line3_1:
     # display clusters
     if 'cluster' in st.session_state.data:
         # display dataframe header
-        st.write("First 20 entries in data with clusters:")
+        st.write("First 5 entries in data with clusters:")
         st.dataframe(data=st.session_state.data[['title', 'cluster']].head(5))
-    
+        #indices = st.session_state.data['cluster'] == "0"
+        #st.dataframe(data=st.session_state.data.loc[indices][['title', 'cluster', 'content']])
+        #st.dataframe(data=st.session_state.data[['title', 'cluster', 'content']].loc[st.session_state.data['cluster'] == 0].head(10))
+
         clustered_path = st.text_area("Path", value="clustered_articles1.csv")
         if st.button("Save Clusters"):
             news_dataloader.save_data(str(clustered_data), st.session_state.data)
@@ -172,12 +176,22 @@ with line4_1:
         y="count",
         title="Published articles on event",
         color_discrete_sequence=["#9EE6CF"],
+        labels={publication:'News Agency', 'count':'Number of Articles'}
     )
     st.plotly_chart(fig, theme="streamlit", use_container_width=True)
     
     st.subheader("Reporting Sentiment")
-    # Kaggle
-    st.markdown("..")
+    titles = []
+    sentiments = []
+    for index, row in st.session_state.data.loc[reportings_indices].iterrows():
+        title = row[publication] + ": " + row['title']
+        titles.append(title)
+        score = news_sentimentanalysis.get_sentiment_scores(row['content'])['compound']
+        sentiments.append(score)
+        color = "green" if score>0 else "red"
+        st.write(row[publication] + ": :" + color + "[" + row['title'] + "] has sentiment score " + str(score))
+    sentiment_df = pd.DataFrame({'titles':titles, 'sentiments':sentiments})
+    
 
 with line4_2:
     st.subheader("Summary of Reporting")
@@ -195,5 +209,5 @@ with line4_2:
         news_dataloader.save_data(str(st.session_state.selected_data), st.session_state.data)
 
     
-    st.subheader("Differences in Reporting")
-    st.markdown("..")
+    #st.subheader("Differences in Reporting")
+    #st.markdown("..")
