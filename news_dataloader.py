@@ -40,6 +40,19 @@ def load_data(path, data_limit):
     #st.session_state.data = st.session_state.data.drop(['Unnamed: 0', 'year', 'month', 'url'], axis=1, errors='ignore')
     
     return data
+
+def save_data(path, data):
+    """
+    Update CSV file (for instance when summaries are computed)
+
+    Args:
+        path (str): expected to be under 'data/' folder
+        
+    Returns:
+        dataframe: ..
+    """
+
+    data.to_csv(os.path.join("data/", path))
     
 def parse_ny_post_dates(df_row):
     date_string = df_row['date']

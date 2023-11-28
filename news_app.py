@@ -17,6 +17,7 @@ from streamlit_extras.add_vertical_space import add_vertical_space
 import news_connector
 import news_webscraping
 import news_dataloader
+import news_summarization
 
 ###
 # 1. Scrape Data
@@ -124,7 +125,7 @@ with line3_1:
     
         clustered_path = st.text_area("Path", value="clustered_articles1.csv")
         if st.button("Save Clusters"):
-            st.session_state.data.to_csv(os.path.join("data/", str(clustered_path)))
+            news_dataloader.save_data(str(clustered_data), st.session_state.data)
     
     
     
@@ -140,18 +141,27 @@ with line4_title:
         st.warning("Data has not yet been clustered.")
         st.stop()
     
-    # event to display information about
-    event_selected = st.number_input("Event Selected", 0, nr_clusters, value=0)
-
+    # event to display information about (if events are filled out)
+    if 'event' in st.session_state.data:
+        event_selected = st.number_input("Event Selected", 1, nr_clusters, value=1)
+        reportings_indices = st.session_state.data['event'] == event_selected
+    # else show clusters
+    elif 'cluster' in st.session_state.data:
+        event_selected = st.number_input("Event Selected", 0, nr_clusters, value=0)
+        reportings_indices = st.session_state.data['cluster'] == event_selected
+        
+    # TODO: change from number_input into select box with names
+    # TODO: list one article title as description
+    
+    # list all article titles
+    publication = 'publication' if 'publication' in st.session_state.data else 'name'
+    st.dataframe(data=st.session_state.data.loc[reportings_indices][[publication, 'title']])
 
 with line4_1:
     st.subheader("Who's Reporting?")
-    st.markdown("Comparison of what news agencies are reporting on this event")
+    st.markdown("_Comparison of what news agencies are reporting on this event:_")
     
-    publication = 'publication' if 'publication' in st.session_state.data else 'name'
-    
-    reportings_df = st.session_state.data.loc[st.session_state.data['cluster'] == event_selected]
-    counts = reportings_df[publication].value_counts()
+    counts = st.session_state.data.loc[reportings_indices][publication].value_counts()
     counts_df = pd.DataFrame({publication:counts.index, 'count':counts.values})
     #reportings_count_df = pd.DataFrame([[st.session_state.data['name'].unique()],[]])
     #reportings_df.columns = ["Agency", "Count"]
@@ -171,8 +181,19 @@ with line4_1:
 
 with line4_2:
     st.subheader("Summary of Reporting")
-    # GPT
-    st.markdown("..")
+    st.markdown("_A summary comparison of how different news agencies report on this event:_")
+    if 'summary' not in st.session_state.data:
+        st.session_state.data["summary"] = "-"
+    save_df = False
+    for index, row in st.session_state.data.loc[reportings_indices].iterrows():
+        if row['summary'] == "-":
+            save_df = True
+            st.session_state.data.iloc[index, st.session_state.data.columns.get_loc('summary')] = news_summarization.get_summary(row['content'])
+        st.markdown("*" + row[publication] + "*: " + st.session_state.data.iloc[index, st.session_state.data.columns.get_loc('summary')])
+    if save_df:
+        print("Updating csv with summaries: ", str(st.session_state.selected_data))
+        news_dataloader.save_data(str(st.session_state.selected_data), st.session_state.data)
+
     
     st.subheader("Differences in Reporting")
     st.markdown("..")
